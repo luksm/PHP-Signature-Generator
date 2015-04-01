@@ -3,20 +3,25 @@ if (!empty($_REQUEST['Sender'])):
     $sender = $_REQUEST['Sender'];
     $layout = file_get_contents('./layout.html', FILE_USE_INCLUDE_PATH);
 
-    if (empty($sender['mobile'])) {
-        $start = strpos($layout, '[[IF-MOBILE]]');
-        $end   = strpos($layout, '[[ENDIF-MOBILE]]');
-        $layout = str_replace(substr($layout, $start, $end-$start+16), '', $layout);
+    foreach ($sender as $key => $value) {
+        $key         = strtoupper($key);
+        $start_if    = strpos($layout, '[[IF-' . $key . ']]');
+        $end_if      = strpos($layout, '[[ENDIF-' . $key . ']]');
+        $length      = strlen('[[ENDIF-' . $key . ']]');
 
-    } else {
-        $layout = str_replace("[[IF-MOBILE]]", '', $layout);
-        $layout = str_replace("[[ENDIF-MOBILE]]", '', $layout);
-        $layout = str_replace("[[MOBILE]]", $sender['mobile'], $layout);
+        if (!empty($value)) {
+            // Add the value at its proper location.
+            $layout = str_replace('[[IF-' . $key . ']]', '', $layout);
+            $layout = str_replace('[[ENDIF-' . $key . ']]', '', $layout);
+            $layout = str_replace('[[' . $key . ']]', $value, $layout);
+        } elseif (is_numeric($start_if)) {
+            // Remove the placeholder and brackets if there is an if-statement but no value.
+            $layout = str_replace(substr($layout, $start_if, $end_if - $start_if + $length), '', $layout);
+        } else {
+            // Remove the placeholder if there is no value.
+            $layout = str_replace('[[' . $key . ']]', '', $layout);
+        }
     }
-    
-    $layout = str_replace("[[NAME]]", $sender['name'], $layout);
-    $layout = str_replace("[[PHONE]]", $sender['phone'], $layout);
-    $layout = str_replace("[[EMAIL]]", $sender['email'], $layout);
 
     if (!empty($_REQUEST['download'])) {
         header('Content-Description: File Transfer');
