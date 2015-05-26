@@ -23,6 +23,10 @@ if (!empty($_REQUEST['Sender'])):
         }
     }
 
+    // Clean up any leftover placeholders. This is useful for booleans,
+    // which are not submitted if left unchecked.
+    $layout = preg_replace("/\[\[IF-(.*?)\]\]([\s\S]*?)\[\[ENDIF-(.*?)\]\]/u", "", $layout);
+
     if (!empty($_REQUEST['download'])) {
         header('Content-Description: File Transfer');
         header('Content-Type: text/html');
@@ -139,6 +143,10 @@ else: ?><!DOCTYPE html>
                     <div class="form-group">
                         <label for="Mobile">Celular</label>
                         <input type="phone" class="form-control" id="Mobile" name="Sender[mobile]" placeholder="+XX (XX) XXXXX-XXXX">
+                    </div>
+                    <div class="form-group">
+                        <label for="Website">Display website</label>
+                        <input type="checkbox" class="form-control" id="Website" name="Sender[website]">
                     </div>
 
                     <button id="preview" type="submit" class="btn btn-default">Preview</button>
